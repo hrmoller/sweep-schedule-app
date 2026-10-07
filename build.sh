@@ -10,6 +10,7 @@
 # Environment:
 #   UNIVERSAL=1      build for arm64 and x86_64 instead of just this Mac's architecture
 #   APP_VERSION=x.y.z  stamp this version into the app's Info.plist
+#                    (`package` defaults to <VERSION file>.0; the release workflow adds the commit count)
 #   BUNDLE_ID=...    use your own reverse-DNS bundle identifier
 #
 # Needs the Xcode Command Line Tools:  xcode-select --install
