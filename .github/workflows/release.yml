@@ -1,0 +1,106 @@
+name: Release
+
+# Every change merged to main publishes a downloadable build as a GitHub release.
+# Pull requests that touch the packaging run the same steps but do not publish;
+# the resulting zip is attached to the workflow run so it can be tried out.
+
+on:
+  push:
+    branches: [main]
+    # Docs-only changes don't need a new build.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.claude/**'
+  pull_request:
+    paths:
+      - 'build.sh'
+      - 'Info.plist'
+      - 'VERSION'
+      - 'Design/**'
+      - '.github/workflows/release.yml'
+
+permissions:
+  contents: write   # creating the release; pull requests from forks get a read-only token regardless
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the version number uses the commit count
+
+      - name: Work out the version
+        id: version
+        run: |
+          # VERSION holds "major.minor" (edit it to bump); the patch number is the commit count.
+          base="$(tr -d '[:space:]' < VERSION)"
+          echo "version=$base.$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Core logic tests
+        run: ./build.sh test
+
+      - name: Build universal app and zip it
+        env:
+          APP_VERSION: ${{ steps.version.outputs.version }}
+        run: ./build.sh package
+
+      - name: Check the build
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          app=build/SweepSchedule.app
+          archs="$(lipo -archs "$app/Contents/MacOS/SweepSchedule")"
+          echo "architectures: $archs"
+          case "$archs" in
+            *arm64*x86_64*|*x86_64*arm64*) ;;
+            *) echo "Expected a universal binary"; exit 1 ;;
+          esac
+          codesign --verify --verbose "$app"
+          built="$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")"
+          test "$built" = "$VERSION"
+          (cd dist && shasum -a 256 -c ./*.sha256)
+
+      - name: Keep the zip from pull request runs
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SweepSchedule-${{ steps.version.outputs.version }}
+          path: dist/*
+          retention-days: 7
+
+      - name: Publish release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          tag="v$VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; nothing to do."
+            exit 0
+          fi
+
+          cat > notes.md <<'EOF'
+          **Install:** download `SweepSchedule-@VERSION@.zip`, unzip it and drag **SweepSchedule.app** to your Applications folder. Works on Apple silicon and Intel Macs running macOS 13 or later.
+
+          This build is not notarized by Apple, so macOS blocks it the first time. Open **System Settings > Privacy & Security**, scroll to the message about SweepSchedule and choose **Open Anyway**. Or, in Terminal: `xattr -dr com.apple.quarantine /Applications/SweepSchedule.app`.
+
+          The SHA-256 checksum is in the `.sha256` file.
+
+          ---
+          EOF
+          sed -i '' "s/@VERSION@/$VERSION/g" notes.md
+
+          gh release create "$tag" dist/*.zip dist/*.sha256 \
+            --target "$GITHUB_SHA" \
+            --title "Sweep Schedule $VERSION" \
+            --notes-file notes.md \
+            --generate-notes \
+            --latest

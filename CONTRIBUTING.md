@@ -33,6 +33,12 @@ Use a throwaway watched folder while developing (add one in Settings) rather tha
 3. Run `./build.sh test` and `./build.sh build`; CI runs the same commands on macOS.
 4. Describe what changed and why, and mention anything you could not test (for example the UI on a particular macOS version).
 
+## Releases
+
+Merging to `main` publishes a release automatically (`.github/workflows/release.yml`): it runs the tests, builds a universal app, and attaches a zip and checksum to a new `v<major>.<minor>.<commits>` release. Docs-only changes don't trigger one. To bump the major or minor number, edit the `VERSION` file. Pull requests that change `build.sh`, `Info.plist`, `VERSION`, `Design/` or the workflow run the same steps without publishing, and keep the zip as a downloadable workflow artifact.
+
+Releases are ad-hoc signed, not notarized (that needs a paid Apple Developer ID), which is why the README explains **Open Anyway**.
+
 ## Reporting bugs
 
 Please include your macOS version, what you expected, and what happened. If files were trashed unexpectedly, attach the relevant lines from `~/Library/Application Support/SweepSchedule/history.log` (remove anything private).
