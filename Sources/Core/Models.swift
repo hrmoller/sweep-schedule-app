@@ -12,7 +12,27 @@ struct WatchedFolder: Codable, Identifiable, Equatable {
     var enabled: Bool = true
 
     var url: URL {
-        URL(fileURLWithPath: (path as NSString).expandingTildeInPath, isDirectory: true)
+        URL(fileURLWithPath: WatchedFolder.expandTilde(path), isDirectory: true)
+    }
+
+    /// Home directory used for `~` in paths. Overridable for development (README screenshots run
+    /// against a throwaway home): `SWEEP_SCHEDULE_HOME=/path/to/fake-home`.
+    static var homeDirectory: String {
+        if let h = ProcessInfo.processInfo.environment["SWEEP_SCHEDULE_HOME"], !h.isEmpty { return h }
+        return NSHomeDirectory()
+    }
+
+    static func expandTilde(_ p: String) -> String {
+        if p == "~" { return homeDirectory }
+        if p.hasPrefix("~/") { return homeDirectory + p.dropFirst(1) }
+        return p
+    }
+
+    static func abbreviateTilde(_ p: String) -> String {
+        let home = homeDirectory
+        if p == home { return "~" }
+        if p.hasPrefix(home + "/") { return "~" + p.dropFirst(home.count) }
+        return p
     }
 
     var displayName: String { url.lastPathComponent }

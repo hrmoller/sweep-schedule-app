@@ -166,6 +166,15 @@ check(Safety.rejectionReason(for: URL(fileURLWithPath: "/Users"), home: home) !=
 check(Safety.rejectionReason(for: URL(fileURLWithPath: "/Users/alice/Downloads"), home: home) == nil, "Downloads allowed")
 check(Safety.rejectionReason(for: URL(fileURLWithPath: "/Users/alice/Desktop/Screenshots"), home: home) == nil, "subfolder allowed")
 
+// MARK: Tilde handling
+
+setenv("SWEEP_SCHEDULE_HOME", "/Users/alice", 1)
+check(WatchedFolder(path: "~/Downloads").url.path == "/Users/alice/Downloads", "~ expands against the home directory")
+check(WatchedFolder(path: "/Volumes/Data/Inbox").url.path == "/Volumes/Data/Inbox", "absolute paths are untouched")
+check(WatchedFolder.abbreviateTilde("/Users/alice/Desktop/Shots") == "~/Desktop/Shots", "paths inside home are abbreviated")
+check(WatchedFolder.abbreviateTilde("/Users/alicia/Downloads") == "/Users/alicia/Downloads", "a sibling user's path is not abbreviated")
+unsetenv("SWEEP_SCHEDULE_HOME")
+
 // MARK: Summary
 
 let many = (1...8).map { eval("file\($0).bin", ageDays: 27) }

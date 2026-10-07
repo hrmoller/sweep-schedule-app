@@ -10,6 +10,20 @@ A small, native macOS menu bar app that keeps your Downloads folder (and any oth
 
 It runs in the background with no Dock icon, starts at login, and checks once a day (09:00 by default, or right after wake-up if the Mac was asleep). Everything stays on your machine: no network access, no analytics.
 
+## What it looks like
+
+A trash icon in the menu bar is all you normally see. It shows a count while anything is in its warning period.
+
+<p align="center"><img src="docs/screenshots/menu.png" width="267" alt="The menu bar menu: last check time, Review Expiring Items, Check Now, Settings, Open History Log, Quit"></p>
+
+**Review window.** Everything that is about to be trashed, grouped by folder, with the date it will go. *Reveal* shows the item in Finder; *Keep* restarts its clock.
+
+<p align="center"><img src="docs/screenshots/review.png" width="620" alt="Review window listing seven items in Downloads that move to the Trash in 4 days, each with Reveal and Keep buttons"></p>
+
+**Settings.** Add any folder and give it its own age limit and warning period.
+
+<p align="center"><img src="docs/screenshots/settings.png" width="620" alt="Settings window with two watched folders, Downloads (30 days, warn 5 days ahead) and Screenshots (14 days, warn 3 days ahead), the daily check time and Open at login"></p>
+
 ## Requirements
 
 - macOS 13 (Ventura) or later
@@ -72,6 +86,7 @@ Sources/Core/     Foundation-only logic: scanning, planning, state (unit-testabl
 Sources/App/      Menu bar app, notifications, Settings and Review windows
 Tests/main.swift  Plain-Swift test runner for Sources/Core (no XCTest needed)
 Design/           App icon: SVG masters and the .iconset (the .icns is built by build.sh)
+docs/screenshots/ Images used in this README
 build.sh          Build, test, install and uninstall
 ```
 

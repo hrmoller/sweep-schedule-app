@@ -23,6 +23,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         model.setupLoginItemIfNeeded()
         startScheduler()
         Task { await model.preview() }
+        openWindowsRequestedByEnvironment()
+    }
+
+    /// Development aid used for README screenshots:
+    /// `SWEEP_SCHEDULE_SHOW=settings,review,menu open SweepSchedule.app` opens those on launch.
+    private func openWindowsRequestedByEnvironment() {
+        guard let value = ProcessInfo.processInfo.environment["SWEEP_SCHEDULE_SHOW"] else { return }
+        let wanted = Set(value.lowercased().split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self else { return }
+            if wanted.contains("settings") { self.showSettings() }
+            if wanted.contains("review") { self.showReview() }
+            if let dir = Snapshots.directory {
+                // Use a common-mode timer: menu tracking blocks the main queue, but not the run loop.
+                let timer = Timer(timeInterval: 2.5, repeats: false) { _ in
+                    // Called directly (not via Task) because the main dispatch queue is blocked while a menu is open.
+                    MainActor.assumeIsolated { Snapshots.captureAllWindowsAndQuit(to: dir) }
+                }
+                RunLoop.main.add(timer, forMode: .common)
+            }
+            if wanted.contains("menu") { self.statusItem?.button?.performClick(nil) }
+        }
     }
 
     // MARK: Scheduler

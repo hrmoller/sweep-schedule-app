@@ -15,6 +15,8 @@ final class AppModel: ObservableObject {
 
     private let store: Store
     private var state: State
+    /// Development aid (README screenshots): demo files are freshly created, so their "Date Added" is today.
+    private let useAddedDate = ProcessInfo.processInfo.environment["SWEEP_SCHEDULE_IGNORE_ADDED_DATE"] == nil
 
     init(store: Store = Store()) {
         self.store = store
@@ -58,9 +60,9 @@ final class AppModel: ObservableObject {
         isRunning = true
         defer { isRunning = false }
 
-        let cfg = config, st = state, now = Date()
+        let cfg = config, st = state, now = Date(), added = useAddedDate
         let result = await Task.detached(priority: .utility) {
-            Engine.evaluate(config: cfg, state: st, now: now)
+            Engine.evaluate(config: cfg, state: st, now: now, useAddedDate: added)
         }.value
 
         pending = result.evaluations
@@ -75,9 +77,9 @@ final class AppModel: ObservableObject {
         isRunning = true
         defer { isRunning = false }
 
-        let cfg = config, st = state, now = Date()
+        let cfg = config, st = state, now = Date(), added = useAddedDate
         let result = await Task.detached(priority: .utility) {
-            Engine.evaluate(config: cfg, state: st, now: now)
+            Engine.evaluate(config: cfg, state: st, now: now, useAddedDate: added)
         }.value
 
         let canNotify = await Notifier.ensureAuthorized()
@@ -131,7 +133,7 @@ final class AppModel: ObservableObject {
     /// Returns an error message if the folder can't be watched.
     func addFolder(_ url: URL) -> String? {
         if let reason = Safety.rejectionReason(for: url) { return reason }
-        let path = (url.path as NSString).abbreviatingWithTildeInPath
+        let path = WatchedFolder.abbreviateTilde(url.path)
         if config.folders.contains(where: { $0.url.standardizedFileURL.path == url.standardizedFileURL.path }) {
             return "That folder is already being watched."
         }

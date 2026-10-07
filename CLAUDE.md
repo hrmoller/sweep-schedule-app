@@ -49,6 +49,11 @@ This app deletes (trashes) users' files. Treat these as invariants and keep test
 - Never hardcode personal paths, names or identifiers. Use generic examples (`/Users/alice`) in tests and docs.
 - Don't point manual testing at a real Downloads folder: add a scratch folder in Settings.
 
+## Development environment variables
+
+All optional, for development and the README screenshots only; see `Sources/App/Snapshots.swift`:
+`SWEEP_SCHEDULE_SHOW` (open settings/review/menu on launch), `SWEEP_SCHEDULE_SNAPSHOT_DIR` (write PNGs of the app's own windows, then quit), `SWEEP_SCHEDULE_SUPPORT_DIR`, `SWEEP_SCHEDULE_HOME`, `SWEEP_SCHEDULE_IGNORE_ADDED_DATE`. The screenshots are taken against a throwaway home folder with made-up files so nothing from a real machine appears; never commit screenshots of real folders.
+
 ## Gotchas
 
 - `UNUserNotificationCenter` crashes unless the process runs from a real `.app` bundle, so the executable can't be run bare. Use `./build.sh install`.

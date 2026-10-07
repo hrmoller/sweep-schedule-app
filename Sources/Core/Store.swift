@@ -11,6 +11,10 @@ struct Store {
     }
 
     static var defaultDir: URL {
+        // Development aid (used for README screenshots): point the app at a throwaway support folder.
+        if let override = ProcessInfo.processInfo.environment["SWEEP_SCHEDULE_SUPPORT_DIR"], !override.isEmpty {
+            return URL(fileURLWithPath: override, isDirectory: true)
+        }
         let fm = FileManager.default
         let base = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
