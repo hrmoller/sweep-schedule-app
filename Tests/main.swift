@@ -58,7 +58,7 @@ let oldItem = eval("old.zip", ageDays: 31, record: ItemRecord(firstWarned: now.a
 let warnItem = eval("soon.pdf", ageDays: 27)
 let freshItem = eval("new.png", ageDays: 3)
 
-var state = State()
+var state = SweepState()
 state.records[oldItem.id] = ItemRecord(firstWarned: now.addingTimeInterval(-6 * day),
                                        lastNotified: now.addingTimeInterval(-1 * day))
 
@@ -90,7 +90,7 @@ check(outcome.toNotify.count == 1, "daily reminder the next day")
 check(stateNextDay.records[warnItem.id]?.firstWarned == now, "firstWarned is not overwritten")
 
 // Notifications unavailable: nothing may be trashed and nothing is marked as warned.
-var blockedState = State()
+var blockedState = SweepState()
 blockedState.records[oldItem.id] = ItemRecord(firstWarned: now.addingTimeInterval(-6 * day))
 trashed = []
 outcome = Engine.apply(evaluations: [oldItem, warnItem], state: &blockedState, now: now, canNotify: false) {
@@ -103,7 +103,7 @@ check(blockedState.records[warnItem.id]?.firstWarned == nil, "not marked warned 
 
 // A failing trash keeps the item pending.
 struct Boom: Error {}
-var failState = State()
+var failState = SweepState()
 failState.records[oldItem.id] = ItemRecord(firstWarned: now.addingTimeInterval(-6 * day))
 outcome = Engine.apply(evaluations: [oldItem], state: &failState, now: now, canNotify: true) { _ in throw Boom() }
 check(outcome.failed.count == 1 && outcome.trashed.isEmpty, "failure reported")
@@ -146,13 +146,13 @@ if let p = scanned.first(where: { $0.url.lastPathComponent == "project" }) {
 
 // Engine.evaluate end to end (never warned -> a.txt must be warn, not trash)
 let cfg = Config(folders: [WatchedFolder(path: tmp.path)], checkHour: 9)
-let result = Engine.evaluate(config: cfg, state: State(), now: Date(), useAddedDate: false)
+let result = Engine.evaluate(config: cfg, state: SweepState(), now: Date(), useAddedDate: false)
 check(result.errors.isEmpty, "no errors: \(result.errors)")
 check(result.evaluations.first(where: { $0.name == "a.txt" })?.verdict == .warn, "40 day old, never warned file gets a warning first")
 check(result.evaluations.first(where: { $0.name == "project" })?.verdict == .fresh, "active folder is fresh")
 
 let missing = Engine.evaluate(config: Config(folders: [WatchedFolder(path: tmp.path + "/nope")], checkHour: 9),
-                              state: State(), now: Date())
+                              state: SweepState(), now: Date())
 check(missing.errors.count == 1, "missing folder is reported")
 
 // MARK: Sizes
@@ -169,10 +169,10 @@ check(FolderScanner.size(of: sized.appendingPathComponent("missing")) == 0, "mis
 
 let cfgSized = Config(folders: [WatchedFolder(path: sized.path, maxAgeDays: 1, warnDays: 1)], checkHour: 9)
 let later2 = Date().addingTimeInterval(10 * day)
-let sizedResult = Engine.evaluate(config: cfgSized, state: State(), now: later2, useAddedDate: false)
+let sizedResult = Engine.evaluate(config: cfgSized, state: SweepState(), now: later2, useAddedDate: false)
 check(sizedResult.evaluations.count == 2 && sizedResult.evaluations.allSatisfy { $0.size > 0 },
       "non-fresh items are measured: \(sizedResult.evaluations.map { $0.size })")
-let freshResult = Engine.evaluate(config: cfgSized, state: State(), now: Date().addingTimeInterval(-10 * day), useAddedDate: false)
+let freshResult = Engine.evaluate(config: cfgSized, state: SweepState(), now: Date().addingTimeInterval(-10 * day), useAddedDate: false)
 check(freshResult.evaluations.allSatisfy { $0.verdict == .fresh && $0.size == 0 }, "fresh items are not measured")
 check(Summary.totalSizeText(for: sizedResult.evaluations) != nil, "total is shown when sizes are known")
 check(Summary.totalSizeText(for: [eval("a", ageDays: 27)]) == nil, "no total when nothing was measured")
@@ -219,7 +219,7 @@ storedConfig.checkHour = 14
 store.saveConfig(storedConfig)
 check(store.loadConfig() == storedConfig, "config round-trips")
 
-var storedState = State()
+var storedState = SweepState()
 storedState.records["/x"] = ItemRecord(firstWarned: Date(timeIntervalSince1970: 1_700_000_000))
 storedState.lastRun = Date(timeIntervalSince1970: 1_700_000_100)
 store.saveState(storedState)
