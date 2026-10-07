@@ -63,6 +63,42 @@ enum FolderScanner {
         return result
     }
 
+    /// Safety valve for `size(of:)`, like `maxDescendantsInspected`.
+    static let maxDescendantsMeasured = 500_000
+
+    /// Approximate disk space `url` occupies, in bytes: the allocated size of a file, or of every
+    /// regular file inside a folder (hidden ones too, since they go to the Trash with it).
+    /// Approximate because hard links are counted once per link and the result stops at
+    /// `maxDescendantsMeasured` entries.
+    static func size(of url: URL, fm: FileManager = .default) -> Int64 {
+        let keys: [URLResourceKey] = [.isRegularFileKey, .totalFileAllocatedSizeKey, .fileAllocatedSizeKey, .fileSizeKey]
+
+        func fileSize(_ url: URL) -> Int64 {
+            guard let v = try? url.resourceValues(forKeys: Set(keys)), v.isRegularFile == true else { return 0 }
+            return Int64(v.totalFileAllocatedSize ?? v.fileAllocatedSize ?? v.fileSize ?? 0)
+        }
+
+        var isDir: ObjCBool = false
+        guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
+        if !isDir.boolValue { return fileSize(url) }
+
+        guard let enumerator = fm.enumerator(
+            at: url,
+            includingPropertiesForKeys: keys,
+            options: [],
+            errorHandler: { _, _ in true }
+        ) else { return 0 }
+
+        var total: Int64 = 0
+        var count = 0
+        for case let child as URL in enumerator {
+            count += 1
+            if count > maxDescendantsMeasured { break }
+            total += fileSize(child)
+        }
+        return total
+    }
+
     private static func newestModification(in dir: URL, fm: FileManager) -> Date {
         var newest = Date.distantPast
         guard let enumerator = fm.enumerator(

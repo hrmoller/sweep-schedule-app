@@ -78,7 +78,10 @@ enum Engine {
                 let items = try FolderScanner.scan(folder: folder.url, fm: fm, useAddedDate: useAddedDate)
                 for item in items {
                     let record = state.records[item.url.path]
-                    all.append(Planner.evaluate(item: item, folder: folder, record: record, now: now))
+                    var ev = Planner.evaluate(item: item, folder: folder, record: record, now: now)
+                    // Measuring a folder walks its whole tree, so only do it for items that matter.
+                    if ev.verdict != .fresh { ev.size = FolderScanner.size(of: item.url, fm: fm) }
+                    all.append(ev)
                 }
             } catch {
                 errors.append("\(folder.path): \(error.localizedDescription)")
@@ -146,6 +149,19 @@ enum Engine {
 }
 
 enum Summary {
+    /// "1.2 GB", "340 KB", ... in the same decimal units Finder uses.
+    static func sizeText(_ bytes: Int64) -> String {
+        let f = ByteCountFormatter()
+        f.countStyle = .file
+        return f.string(fromByteCount: bytes)
+    }
+
+    /// Total size of the given items, e.g. "1.2 GB"; nil when nothing was measured.
+    static func totalSizeText(for evaluations: [Evaluation]) -> String? {
+        let total = evaluations.reduce(Int64(0)) { $0 + $1.size }
+        return total > 0 ? sizeText(total) : nil
+    }
+
     /// Text for the "these files are about to be trashed" notification.
     static func notification(for evaluations: [Evaluation],
                              now: Date,

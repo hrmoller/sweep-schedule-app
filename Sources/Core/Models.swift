@@ -91,6 +91,9 @@ struct Evaluation: Identifiable, Equatable {
     /// Earliest moment the item may be moved to the Trash.
     let deadline: Date
     let verdict: Verdict
+    /// Disk space the item takes up, in bytes (folders: everything inside, hidden files included).
+    /// Only measured for items that are not `.fresh`; 0 means "not measured".
+    var size: Int64 = 0
 
     var id: String { item.url.path }
     var name: String { item.url.lastPathComponent }
