@@ -65,15 +65,15 @@ struct Store {
 
     // MARK: State
 
-    func loadState() -> State {
+    func loadState() -> SweepState {
         guard let data = try? Data(contentsOf: stateURL),
-              let state = try? makeDecoder().decode(State.self, from: data) else {
-            return State()
+              let state = try? makeDecoder().decode(SweepState.self, from: data) else {
+            return SweepState()
         }
         return state
     }
 
-    func saveState(_ state: State) {
+    func saveState(_ state: SweepState) {
         if let data = try? makeEncoder().encode(state) {
             try? data.write(to: stateURL, options: .atomic)
         }

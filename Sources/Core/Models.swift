@@ -50,7 +50,7 @@ struct Config: Codable, Equatable {
 
 // MARK: - Persistent state
 
-/// Bookkeeping for a single item, keyed by its absolute path in `State.records`.
+/// Bookkeeping for a single item, keyed by its absolute path in `SweepState.records`.
 struct ItemRecord: Codable, Equatable {
     /// When the user was first notified about this item.
     var firstWarned: Date?
@@ -60,7 +60,7 @@ struct ItemRecord: Codable, Equatable {
     var keptAt: Date?
 }
 
-struct State: Codable, Equatable {
+struct SweepState: Codable, Equatable {
     var records: [String: ItemRecord] = [:]
     var lastRun: Date?
     var loginConfigured: Bool = false

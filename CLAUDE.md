@@ -21,7 +21,7 @@ There is no Xcode project or Package.swift. These commands require macOS with Xc
 ## Architecture
 
 - `Sources/Core/` is **Foundation-only** and contains every decision:
-  - `Models.swift`: `Config`, `WatchedFolder`, `State`, `ItemRecord`, `ScannedItem`, `Evaluation`, `Verdict`
+  - `Models.swift`: `Config`, `WatchedFolder`, `SweepState`, `ItemRecord`, `ScannedItem`, `Evaluation`, `Verdict`
   - `FolderScanner.swift`: lists direct children, computes each item's age date
   - `Planner.swift`: `Planner.evaluate` (pure per-item verdict), `Engine.evaluate` (scan everything, no side effects), `Engine.apply` (trash what is due, record warnings, decide who to notify), `Summary` (notification text)
   - `Safety.swift`: refuses to watch `/`, the home folder, `~/Library`, system folders

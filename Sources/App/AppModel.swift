@@ -14,7 +14,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var errors: [String] = []
 
     private let store: Store
-    private var state: State
+    private var state: SweepState
     /// Development aid (README screenshots): demo files are freshly created, so their "Date Added" is today.
     private let useAddedDate = ProcessInfo.processInfo.environment["SWEEP_SCHEDULE_IGNORE_ADDED_DATE"] == nil
 

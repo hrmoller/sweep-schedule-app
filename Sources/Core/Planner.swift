@@ -57,7 +57,7 @@ enum Engine {
 
     /// Scans every enabled folder and evaluates every item. Has no side effects.
     static func evaluate(config: Config,
-                         state: State,
+                         state: SweepState,
                          now: Date,
                          fm: FileManager = .default,
                          useAddedDate: Bool = true) -> (evaluations: [Evaluation], errors: [String]) {
@@ -96,7 +96,7 @@ enum Engine {
     /// Nothing is ever trashed unless the user could actually have been warned
     /// (`canNotify`) *and* a warning was really sent for that item earlier.
     static func apply(evaluations: [Evaluation],
-                      state: inout State,
+                      state: inout SweepState,
                       now: Date,
                       canNotify: Bool,
                       trash: (URL) throws -> Void) -> RunOutcome {
