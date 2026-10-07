@@ -6,6 +6,12 @@ struct SettingsView: View {
     @State private var launchAtLogin = LoginItem.isEnabled
     @State private var message: String?
 
+    // Explicit so the initializer stays internal: the synthesized memberwise init becomes private
+    // because of the private @State properties, which newer Swift toolchains (CI) reject.
+    init(model: AppModel) {
+        _model = ObservedObject(wrappedValue: model)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Watched folders")
