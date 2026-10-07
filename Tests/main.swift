@@ -155,6 +155,31 @@ let missing = Engine.evaluate(config: Config(folders: [WatchedFolder(path: tmp.p
                               state: State(), now: Date())
 check(missing.errors.count == 1, "missing folder is reported")
 
+// MARK: Sizes
+
+let sized = tmp.appendingPathComponent("sized")
+try fm.createDirectory(at: sized.appendingPathComponent("sub"), withIntermediateDirectories: true)
+try Data(count: 100_000).write(to: sized.appendingPathComponent("big.bin"))
+try Data(count: 50_000).write(to: sized.appendingPathComponent("sub/.hidden.bin"))
+let bigSize = FolderScanner.size(of: sized.appendingPathComponent("big.bin"))
+check(bigSize >= 100_000 && bigSize < 200_000, "file size is its allocated size, got \(bigSize)")
+let folderSize = FolderScanner.size(of: sized)
+check(folderSize >= bigSize + 50_000, "folder size includes nested and hidden files, got \(folderSize)")
+check(FolderScanner.size(of: sized.appendingPathComponent("missing")) == 0, "missing path measures 0")
+
+let cfgSized = Config(folders: [WatchedFolder(path: sized.path, maxAgeDays: 1, warnDays: 1)], checkHour: 9)
+let later2 = Date().addingTimeInterval(10 * day)
+let sizedResult = Engine.evaluate(config: cfgSized, state: State(), now: later2, useAddedDate: false)
+check(sizedResult.evaluations.count == 2 && sizedResult.evaluations.allSatisfy { $0.size > 0 },
+      "non-fresh items are measured: \(sizedResult.evaluations.map { $0.size })")
+let freshResult = Engine.evaluate(config: cfgSized, state: State(), now: Date().addingTimeInterval(-10 * day), useAddedDate: false)
+check(freshResult.evaluations.allSatisfy { $0.verdict == .fresh && $0.size == 0 }, "fresh items are not measured")
+check(Summary.totalSizeText(for: sizedResult.evaluations) != nil, "total is shown when sizes are known")
+check(Summary.totalSizeText(for: [eval("a", ageDays: 27)]) == nil, "no total when nothing was measured")
+// The separator follows the user's locale ("1.2" or "1,2"), so only check the number and unit.
+let gbText = Summary.sizeText(1_200_000_000)
+check(gbText.hasPrefix("1") && gbText.hasSuffix("GB"), "decimal units like Finder: \(gbText)")
+
 // MARK: Safety
 
 let home = URL(fileURLWithPath: "/Users/alice")

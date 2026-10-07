@@ -4,7 +4,7 @@ A small, native macOS menu bar app that keeps your Downloads folder (and any oth
 
 - Items **older than 30 days** are moved to the **Trash**. Nothing is ever deleted outright.
 - **5 days before** that happens you get a notification listing what is about to go, so you have time to move things elsewhere.
-- Click the notification (or the menu bar icon) to open a review window with **Reveal in Finder** and **Keep** for each item.
+- Click the notification (or the menu bar icon) to open a review window with **Reveal in Finder** and **Keep** for each item, along with each item's size and the total space you save.
 - You get a reminder every day until the item is gone or rescued.
 - Every folder has its own age limit and warning period, configurable in a **Settings** window.
 
@@ -16,9 +16,9 @@ A trash icon in the menu bar is all you normally see. It shows a count while any
 
 <p align="center"><img src="docs/screenshots/menu.png" width="267" alt="The menu bar menu: last check time, Review Expiring Items, Check Now, Settings, Open History Log, Quit"></p>
 
-**Review window.** Everything that is about to be trashed, grouped by folder, with the date it will go. *Reveal* shows the item in Finder; *Keep* restarts its clock.
+**Review window.** Everything that is about to be trashed, grouped by folder, with the date it will go and its size, plus the total amount of data that will move to the Trash (the space is freed once you empty it). *Reveal* shows the item in Finder; *Keep* restarts its clock.
 
-<p align="center"><img src="docs/screenshots/review.png" width="620" alt="Review window listing seven items in Downloads that move to the Trash in 4 days, each with Reveal and Keep buttons"></p>
+<p align="center"><img src="docs/screenshots/review.png" width="620" alt="Review window listing seven items in Downloads with their sizes, the total space saved, and Reveal and Keep buttons"></p>
 
 **Settings.** Add any folder and give it its own age limit and warning period.
 

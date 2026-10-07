@@ -30,6 +30,12 @@ struct ReviewView: View {
                     Text("Move anything you want to keep to another folder, or press Keep to restart its clock.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                    if let total = Summary.totalSizeText(for: model.pending) {
+                        Label("Moving \(total) to the Trash", systemImage: "internaldrive")
+                            .font(.callout.weight(.medium))
+                            .padding(.top, 2)
+                            .help("Disk space is freed once the Trash is emptied")
+                    }
                 }
                 Spacer()
                 Button("Refresh") { Task { await model.preview() } }
@@ -91,9 +97,10 @@ struct ReviewView: View {
     }
 
     private func whenText(_ ev: Evaluation) -> String {
-        if ev.verdict == .trash { return "Due now — moves to the Trash at the next check" }
+        let size = ev.size > 0 ? " · \(Summary.sizeText(ev.size))" : ""
+        if ev.verdict == .trash { return "Due now — moves to the Trash at the next check" + size }
         let days = ev.daysLeft(now: Date())
         let date = ev.deadline.formatted(date: .abbreviated, time: .omitted)
-        return "Moves to the Trash in \(days) day\(days == 1 ? "" : "s") (\(date))"
+        return "Moves to the Trash in \(days) day\(days == 1 ? "" : "s") (\(date))" + size
     }
 }
