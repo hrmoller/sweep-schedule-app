@@ -35,7 +35,7 @@ Use a throwaway watched folder while developing (add one in Settings) rather tha
 
 ## Releases
 
-Merging to `main` publishes a release automatically (`.github/workflows/release.yml`): it runs the tests, builds a universal app, and attaches a zip and checksum to a new `v<major>.<minor>.<commits>` release. Docs-only changes don't trigger one. To bump the major or minor number, edit the `VERSION` file. Pull requests that change `build.sh`, `Info.plist`, `VERSION`, `Design/` or the workflow run the same steps without publishing, and keep the zip as a downloadable workflow artifact.
+Merging to `main` publishes a release automatically (`.github/workflows/release.yml`): it runs the tests, builds a universal app, and attaches a zip and checksum to a new `v<major>.<minor>.<commits>` release. Docs-only changes don't trigger one. To bump the major or minor number, edit the `VERSION` file. A local `./build.sh package` uses `<major>.<minor>.0` unless you set `APP_VERSION`; only the workflow adds the commit count. Pull requests that change `build.sh`, `Info.plist`, `VERSION`, `Design/` or the workflow run the same steps without publishing, and keep the zip as a downloadable workflow artifact.
 
 Releases are ad-hoc signed, not notarized (that needs a paid Apple Developer ID), which is why the README explains **Open Anyway**.
 

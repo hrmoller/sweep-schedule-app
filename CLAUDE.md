@@ -57,7 +57,7 @@ All optional, for development and the README screenshots only; see `Sources/App/
 
 ## Releases
 
-`.github/workflows/release.yml` publishes a GitHub release on every push to `main` (except docs-only changes): version = `VERSION` file (`major.minor`) + commit count, universal binary, zip + sha256. Don't create tags or releases by hand. The workflow can't be exercised locally beyond `./build.sh package`; changes to it are checked by the pull request run, which builds but does not publish.
+`.github/workflows/release.yml` publishes a GitHub release on every push to `main` (except docs-only changes): version = `VERSION` file (`major.minor`) + commit count, universal binary, zip + sha256. A local `./build.sh package` uses `<major>.<minor>.0` unless `APP_VERSION` is set; only the workflow adds the commit count. Don't create tags or releases by hand. The workflow can't be exercised locally beyond `./build.sh package`; changes to it are checked by the pull request run, which builds but does not publish.
 
 ## Gotchas
 
