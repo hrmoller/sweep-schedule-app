@@ -12,6 +12,7 @@ Sweep Schedule is a native macOS menu bar app (Swift, AppKit shell + SwiftUI win
 ./build.sh test       # compile Sources/Core + Tests/main.swift and run the checks
 ./build.sh            # build build/SweepSchedule.app (ad-hoc signed)
 ./build.sh install    # build, copy to ~/Applications, launch
+./build.sh package    # universal build zipped into dist/ (APP_VERSION=x.y.z stamps the version)
 ./build.sh uninstall
 BUNDLE_ID=com.example.SweepSchedule ./build.sh build   # override the bundle identifier
 ```
@@ -53,6 +54,10 @@ This app deletes (trashes) users' files. Treat these as invariants and keep test
 
 All optional, for development and the README screenshots only; see `Sources/App/Snapshots.swift`:
 `SWEEP_SCHEDULE_SHOW` (open settings/review/menu on launch), `SWEEP_SCHEDULE_SNAPSHOT_DIR` (write PNGs of the app's own windows, then quit), `SWEEP_SCHEDULE_SUPPORT_DIR`, `SWEEP_SCHEDULE_HOME`, `SWEEP_SCHEDULE_IGNORE_ADDED_DATE`. The screenshots are taken against a throwaway home folder with made-up files so nothing from a real machine appears; never commit screenshots of real folders.
+
+## Releases
+
+`.github/workflows/release.yml` publishes a GitHub release on every push to `main` (except docs-only changes): version = `VERSION` file (`major.minor`) + commit count, universal binary, zip + sha256. Don't create tags or releases by hand. The workflow can't be exercised locally beyond `./build.sh package`; changes to it are checked by the pull request run, which builds but does not publish.
 
 ## Gotchas
 

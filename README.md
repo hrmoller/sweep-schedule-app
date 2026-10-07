@@ -27,9 +27,22 @@ A trash icon in the menu bar is all you normally see. It shows a count while any
 ## Requirements
 
 - macOS 13 (Ventura) or later
-- Xcode or the Xcode Command Line Tools (`xcode-select --install`) to build it
+- Apple silicon or Intel
+- Xcode or the Xcode Command Line Tools (`xcode-select --install`), only if you build it yourself
 
 ## Install
+
+### Download a release
+
+Every change merged to `main` publishes a ready-to-run build, so you don't need Xcode.
+
+1. Download the latest `SweepSchedule-x.y.z.zip` from the [Releases page](https://github.com/hrmoller/sweep-schedule-app/releases/latest).
+2. Unzip it and drag **SweepSchedule.app** to your Applications folder.
+3. Open it. The build is not notarized by Apple, so macOS blocks the first launch: open **System Settings > Privacy & Security**, find the message about SweepSchedule and choose **Open Anyway**. (Or run `xattr -dr com.apple.quarantine /Applications/SweepSchedule.app` once.)
+
+The release also has a `.sha256` file to verify the download. The app is a universal binary, so it runs natively on Apple silicon and Intel Macs.
+
+### Build from source
 
 ```bash
 git clone https://github.com/hrmoller/sweep-schedule-app.git
@@ -44,6 +57,7 @@ Other commands:
 |---|---|
 | `./build.sh` | Build `build/SweepSchedule.app` |
 | `./build.sh test` | Compile and run the core logic tests (no GUI needed) |
+| `./build.sh package` | Universal build zipped into `dist/` (what the release workflow publishes) |
 | `./build.sh install` | Build, copy to `~/Applications` and start it |
 | `./build.sh uninstall` | Quit the app and remove it from `~/Applications` |
 
