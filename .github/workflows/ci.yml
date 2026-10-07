@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Core logic tests
+        run: ./build.sh test
+
+      - name: Build app bundle
+        run: ./build.sh build
+
+      - name: Check bundle
+        run: |
+          test -x build/SweepSchedule.app/Contents/MacOS/SweepSchedule
+          codesign --verify --verbose build/SweepSchedule.app

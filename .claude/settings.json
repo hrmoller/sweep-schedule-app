@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./build.sh test)",
+      "Bash(./build.sh build)",
+      "Bash(./build.sh)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf ~:*)",
+      "Bash(rm -rf /:*)",
+      "Read(~/Library/Application Support/SweepSchedule/state.json)"
+    ]
+  }
+}
